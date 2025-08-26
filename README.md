@@ -25,6 +25,26 @@ Rename any Markdown file that needs inline components to `.mdx` (e.g., `about.md
 
 ---
 
+Try to put `mdx()` last in `integrations`
+
+Order matters. Place the MDX integration at the **end** of the `integrations` array so other plugins can run their transforms first. Some integrations (e.g., `astro-expressive-code`) need to process Markdown/MDX **before** MDX takes over, otherwise styles or components may not render correctly.
+
+```js
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+import expressiveCode from 'astro-expressive-code';
+import mdx from '@astrojs/mdx';
+
+export default defineConfig({
+  integrations: [
+    expressiveCode(), // run first so it can transform content
+    mdx(),            // keep MDX last
+  ],
+});
+```
+
+---
+
 ## 2) Create the component: `src/components/CountUp.svelte`
 
 Please download from this Github repo.
@@ -52,6 +72,22 @@ We reached{' '}
 ```
 
 ---
+
+Frontmatter must be at the very top
+
+Astro only parses frontmatter if it appears **as the first thing in the file**.  
+Any character before the opening `---`—including whitespace, comments, or MDX `import` statements—will cause the frontmatter to be ignored, and required schema fields (e.g. `title`, `published`) will appear “missing”.
+
+**Correct:**
+```mdx
+---
+title: Inline Count-Up Numbers in Astro (Svelte + MDX)
+published: 2025-08-26
+---
+
+import CountUp from "@components/CountUp.svelte";
+
+```
 
 ## 4) Use inside an Astro template (non-MDX)
 
